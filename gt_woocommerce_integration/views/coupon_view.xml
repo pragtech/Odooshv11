@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+     
+        <record id="view_woocom_coupons_tree" model="ir.ui.view">
+            <field name="name">view.woocom.coupons.tree</field>
+            <field name="model">woocom.coupons</field>
+            <field name="arch" type="xml">
+                <tree string="Product tags">
+                    <field name="coupon_code"/>
+                    <field name="description"/>
+                    <field name="coupon_type"/>
+                    <field name="coupon_id" invisible="1" readonly="1"/>   
+                    <field name="to_be_exported"/>    
+                </tree>
+            </field>
+        </record>
+
+
+
+        <record id="view_woocom_coupons_form" model="ir.ui.view">
+            <field name="name">view.woocom.coupons.form</field>
+            <field name="model">woocom.coupons</field>
+            <field name="arch" type="xml">
+                <form string="Tags">
+                    <sheet>
+                        <group>
+                            <field name="coupon_code"/>
+                            <field name="description"/>
+                            <field name="coupon_type"/>
+                            <field name="coupon_id" readonly="1"/>
+                            <field name="to_be_exported"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_woocom_coupons" model="ir.actions.act_window">
+            <field name="name">Coupons</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">woocom.coupons</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name = "context">{'default_to_be_exported' : True }</field>
+        </record>
+
+       
+    </data>
+</odoo>

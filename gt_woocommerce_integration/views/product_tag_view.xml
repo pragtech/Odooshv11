@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+     
+        <record id="view_product_tags_tree" model="ir.ui.view">
+            <field name="name">view.product.tags.tree</field>
+            <field name="model">product.tags</field>
+            <field name="arch" type="xml">
+                <tree string="Product tags">
+                    <field name="name"/>
+                    <field name="slud_code"/>
+                    <field name="description"/>
+                    <field name="tag_id" invisible="1" readonly="1"/>   
+                    <!-- <field name="woocom_id" invisible="1" readonly="1"/>     -->
+                </tree>
+            </field>
+        </record>
+
+
+
+        <record id="view_product_tags_form" model="ir.ui.view">
+            <field name="name">view.product.tags.form</field>
+            <field name="model">product.tags</field>
+            <field name="arch" type="xml">
+                <form string="Tags">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="slud_code"/>
+                            <field name="description"/>
+                            <field name="tag_id" readonly="1"/>
+                            <field name="to_be_exported"/>
+                            <!-- <field name="woocom_id" readonly="1"/> -->
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="action_product_tags_woocom" model="ir.actions.act_window">
+            <field name="name">Product Tags</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.tags</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name = "context">{'default_to_be_exported' : True }</field>
+        </record>
+
+       
+    </data>
+</odoo>
