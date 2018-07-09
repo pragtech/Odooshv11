@@ -99,8 +99,8 @@ class product_images(models.Model):
                             f = open(full_path, 'rb')
                             img = base64.encodestring(f.read())
                             f.close()
-                        except Exception, e:
-                            return False
+                        except Exception as e:
+                           return False
                     else:
                         return False
                 else:
