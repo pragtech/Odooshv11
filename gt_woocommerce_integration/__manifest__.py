@@ -16,7 +16,7 @@
     """,
     "data": [
       'security/woocommerce_security.xml',
-#      'security/ir.model.access.csv',
+      'security/ir.model.access.csv',
 #      'data/product_data.xml',
       'data/woocom_sequence_data.xml',
       'data/product_data.xml',
