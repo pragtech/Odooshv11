@@ -1,0 +1,996 @@
+<odoo>
+		<!-- Amazon Category views -->
+
+		<record id="amazon_product_category_from_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.from.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<form string="Category">
+					<div class="oe_title">
+						<label for="name" string="Category name" class="oe_edit_only" />
+						<h1>
+							<field name="name" placeholder="eg. Tricycle" />
+						</h1>
+					</div>
+					<group name="first" col="4" string="Category Type">
+						<field name="parent_id" domain="[('amazon_category', '=', True)]" />
+						<!-- <field name="type" /> -->
+					</group>
+					<group name="Amazon Information">
+						<field name="amazon_category" readonly="4"></field>
+						<field name="amazon_cat_id" readonly="4"></field>
+					</group>
+					<group name="shops" string="Shops">
+						<field name="shop_ids" nolabel="1" colspan="4"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		
+		<record id="amazon_product_category_tree_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.tree.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<tree string="Category">
+					<field name="display_name" />
+					<field name="amazon_category" />
+					<field name="amazon_cat_id" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="amazon_product_category_search_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.search.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<search string="Category">
+					<field name="name" />
+				</search>
+			</field>
+		</record>
+		
+		<record model="ir.actions.act_window" id="amazon_action_product_category_action">
+			<field name="name">Amazon Category</field>
+			<field name="res_model">product.category</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('amazon_category', '=', True)]</field>
+			<field name="search_view_id"
+				ref="amazon_connector.amazon_product_category_search_view" />
+		</record>
+
+		<record model="ir.actions.act_window.view" id="amazon_action_product_category_tree_view">
+			<field name="sequence" eval="1" />
+			<field name="view_mode">tree</field>
+			<field name="view_id"
+				ref="amazon_connector.amazon_product_category_tree_view" />
+			<field name="act_window_id"
+				ref="amazon_connector.amazon_action_product_category_action" />
+		</record>
+
+		<record model="ir.actions.act_window.view" id="amazon_action_product_category_form_view">
+			<field name="sequence" eval="2" />
+			<field name="view_mode">form</field>
+			<field name="view_id"
+				ref="amazon_connector.amazon_product_category_from_view" />
+			<field name="act_window_id"
+				ref="amazon_connector.amazon_action_product_category_action" />
+		</record>
+		<record id="view_amazon_product_template_form" model="ir.ui.view">
+			<field name="name">product.amazon.form.inherit</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view" />
+			<field name="arch" type="xml">
+				<header>
+					<button name="ExportUpdateProduct" type="object" string="ExportUpdate"/>
+				</header>
+				<xpath expr="//div[@name='options']" position="inside">
+						<div>
+							<field name="amazon_product"/>
+							<label for="amazon_product" />
+							<field name="amazon_export"/>
+							<label for="amazon_export" />
+						</div>
+				</xpath>
+				<xpath expr="//field[@name='currency_id']" position="inside">
+					<field name="feature" />
+				</xpath>
+				<xpath expr="//field[@name='default_code']" position="before">
+					<field name="standard_temp_product" />
+				</xpath>
+				<xpath expr="//field[@name='attribute_line_ids']" position="before">
+					<field name="variationtheme" attrs="{'required':[('attribute_line_ids','!=',[]),('amazon_export','=',True)]}"/>
+				</xpath>
+				<xpath expr="//field[@name='default_code']" position="after">
+					<field name="amazon_sku"/>
+					<field name="amazon_fba_sku"/>
+					<field name="tmp_asin"  attrs="{'invisible':[('standard_temp_product','!=','ASIN')]}"/>
+					<field name="upc_temp" attrs="{'invisible':[('standard_temp_product','!=','UPC')]}"/>
+					<field name="isbn_temp" attrs="{'invisible':[('standard_temp_product','!=','ISBN')]}"/>
+					<field name="ean_barcode" attrs="{'invisible':[('standard_temp_product','!=','EAN')]}"/>
+				</xpath>
+				<xpath expr="//page" position="after">
+					<page string="Amazon Information" attrs="{'invisible':[('amazon_product','=',False)]}">
+						<notebook>
+							<page string="Amazon Attributes">
+								<form string="Product Attribtes">
+									<group col="4">
+										<field name="amazon_categ_id" domain="[('amazon_category','=',True)]"/>
+										<field name="tem_standard_price"/>
+										<field name="is_prime" />
+										<field name="fulfillment_by" />
+										<!-- <field name="amazon_price" /> -->
+										<field name="label" />
+										<field name="product_type_name" />
+										<field name="color" />
+										<!-- <field name="binding"/> -->
+										<field name="brand_name" />
+										<field name="studio" />
+										<field name="amazon_manufacturer" />
+										<!-- <field name="manufacturer_part" /> -->
+										<field name="publisher" />
+										<field name="package_quantity" />
+										<separator colspan="4" string="Product Dimension" />
+										<field name="item_dimension_weight" />
+										<field name="package_dimension_length" />
+										<field name="package_dimension_width" />
+										<field name="package_dimension_weight" />
+										<field name="package_dimension_height" />
+										<separator colspan="4" string="Product Image Dimensions" />
+										<field name="small_image_url" />
+										<field name="small_image_height" />
+										<field name="small_image_width" />
+										</group>
+										<group>
+										<field name="item_type" attrs="{'required':[('amazon_export','=',True)]}"/>
+										<field name="bullet_point">
+											<tree editable="bottom">
+													<field name="bullet"/>
+											</tree>
+										</field>
+										<field name="search_keywords">
+											<tree editable="bottom">
+												<field name="searchterm"/>
+											</tree>
+										</field>
+									</group>
+								</form>
+							</page>
+							<!-- <page string="Amazon Product Listing">
+								<form string="Product Attribtes">
+									<separator colspan="4" string="Product Listing" />
+									<field name="amazon_prodlisting_ids"
+										context="{'default_product_id': active_id,'new_lstn': True}" />
+								</form>
+							</page> -->
+							<!-- <page name="shop_prices" string="Prices">
+								<field name="product_shop_price_ids" nolable="1" position="after">
+									<tree>	
+										<field name="shop_id" />
+										<field name="price" />
+									</tree>
+								</field>
+							</page> -->
+						</notebook>
+					</page>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_amazon_product_template_filter" model="ir.ui.view">
+			<field name="name">product.template.list</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_search_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<filter name="prime_group" string="Prime Product" domain="[('is_prime','=',True)]"/>
+				</xpath>
+			</field>
+		</record>
+
+		<!-- Product Form View -->
+		<record id="view_amazon_product_product_form" model="ir.ui.view">
+			<field name="name">product.amazon.form.inherit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="arch" type="xml">
+				<div name="button_box" position="inside">
+					<button class="oe_stat_button" name="action_view_amazon_log"
+						attrs="{'invisible': [('amazon_product_model_count', '=', 0)]}"
+						type="object" icon="fa-usd">
+						<field string="Logs" name="amazon_product_model_count"
+							widget="statinfo" />
+					</button>
+				</div>
+				<!-- <xpath expr="//field[@name='default_code']" position="before">
+					<field name="standard_temp_product" />
+				</xpath> -->
+				<xpath expr="//field[@name='lst_price']" position="before">
+					<field name="asin" />
+					<!-- <field name="amazon_sku" invisible="1"/> -->
+					<field name="amazon_afn_sku"/>
+					<!-- <field name="ean_barcode" attrs="{'invisible':[('standard_temp_product','!=','EAN')]}"/> -->
+					<field name="upc"/>
+					<!-- <field name="isbn" attrs="{'invisible':[('standard_temp_product','!=','ISBN')]}"/> -->
+				</xpath>
+			
+				<xpath expr="//page[1]" position="after">
+					<page string="Amazon Information">
+						<notebook>
+							<page string="Amazon Attributes">
+								<form string="Product Attribtes">
+									<group col="4">
+										<field name="amazon_categ_id" domain="[('amazon_category','=',True)]"/>
+										<field name="amazon_standard_price" />
+										<field name="amazon_fba_price" />
+										<field name="label" />
+										<field name="is_prime" />
+										<field name="fulfillment_channel" />
+										<field name="product_type_name" />
+										<field name="color" />
+										<!-- <field name="style_name"/> -->
+										<field name="brand_name"/>
+										<field name="studio" />
+										<!-- <field name="variationtheme" string="select VariationTheme"/> -->
+										<field name="amazon_manufacturer" />
+										<!-- <field name="manufacturer_part" /> -->
+										<field name="publisher" />
+										<field name="package_quantity" />
+										<separator colspan="4" string="Product Dimension" />
+										<field name="item_dimension_weight"/>
+										<field name="package_dimension_length"/>
+										<field name="package_dimension_width" />
+										<field name="package_dimension_weight" />
+										<field name="package_dimension_height" />
+										<field name="shipping_weight" />
+										<field name="shipping_weight_uom" />
+										<separator colspan="4" string="Product Image Dimensions" />
+										<field name="small_image_url" />
+										<field name="small_image_height" />
+										<field name="small_image_width" />
+										<!-- <field name="item_type" attrs="{'required':[('amazon_export','=',True)]}"/> -->
+										<!-- <separator colspan="4" string="Material Type" /> -->
+										<!-- <field name="material_type"/> -->
+									</group>
+								</form>
+							</page>
+							<!-- <page string="Amazon Product Listing">
+								<form string="Product Attribtes">
+									<separator colspan="4" string="Product Listing" />
+									<field name="amazon_prodlisting_ids"
+										context="{'default_product_id': active_id,'new_lstn': True}" />
+								</form>
+							</page> -->
+						</notebook>
+					</page>
+				</xpath>
+				<xpath expr="//field[@name='purchase_ok']" position="after">
+					<div class="oe_left" name="options">
+						<div>
+							<field name="amazon_product"/>
+							<label for="amazon_product" />
+							<field name="amazon_export" />
+							<label for="amazon_export" />
+						</div>
+					</div>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_amazon_product_listing_tree" model="ir.ui.view">
+			<field name="name">amazon.product.listing</field>
+			<field name="model">amazon.product.listing</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Product Amazon Listing">
+					<field name="shop_id" />
+					<field name="name" />
+					<field name="new_lstn" invisible="1" />
+					<field name="title" invisible="1" />
+					<field name="default_code" />
+					<field name="asin" />
+					<field name="listing_id" invisible="1" />
+					<field name="quantity" invisible="1" />
+					<field name="currency_id" />
+					<field name="price" invisible="1" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_product_filter" model="ir.ui.view">
+			<field name="name">product.product.list</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_search_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<filter name="prime_group" string="Prime Product" domain="[('is_prime','=',True)]"/>
+					<filter string="Exported Product" name="exported_product"
+						domain="[('amazon_product','=',True),('updated_data','=',True)]" help="Product that has been Exported" />
+						
+					<filter string="Product To Exported" name="draft"
+						domain="[('amazon_product','=',True),('updated_data','!=',True)]" help="Product that has to be Exported" />
+				</xpath>
+			</field>
+		</record>
+		<record id="view_amazon_product_listing_form" model="ir.ui.view">
+			<field name="name">amazon.product.listing</field>
+			<field name="model">amazon.product.listing</field>
+			<field name="context" eval="{'default_new_lstn': True}" />
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Product Amazon Listing">
+
+					<sheet>
+						<group cols="4">
+							<field name="shop_id"/>
+							<field name="new_lstn" invisible="1" context="{'new_lstn': True}" />
+							<field name="name" />
+							<field name="title"/>
+							<field name="default_code" />
+							<field name="fulfillment_by" />
+							<field name="asin"/>
+							<field name="code_type"/>
+							<field name="currency_id"/>
+							<field name="price"/>
+							<field name="quantity"/>
+							<field name="amazon_condition" />
+							<field name="condition"/>
+							<field name="prod_dep"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<!-- <record id="amazon_product_template_tree_view_inherit" model="ir.ui.view">
+			<field name="name">product.product.product.tree</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_tree_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='categ_id']" position="after">
+
+					<field name="small_image_url" />
+				</xpath>
+			</field>
+		</record> -->
+
+
+		<!-- <record id="product.product_template_action" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="product.product_template_kanban_view" />
+			<field name="domain">[('amazon_product','=',False)]</field>
+			<field name="context">{"search_default_filter_to_sell":1}</field>
+		</record> -->
+
+		<record id="amazon_product_template_action" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="product.product_template_kanban_view" />
+			<field name="context">{"search_default_filter_to_sell":1}</field>
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+		<!--Product Product Views -->
+		
+		<record id="amazon_product_product_action" model="ir.actions.act_window">
+            <field name="name">Product Variants</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="product.product_kanban_view" />
+            <field name="context">{"search_default_filter_to_purchase": 1}</field>
+            <field name="domain">[('amazon_product','=',True)]</field>
+        </record>
+
+
+		<record id="product_normal_form_view_inherit" model="ir.ui.view">
+			<field name="name">product.product.form</field>
+			<field name="model">product.product</field>
+			<field name="mode">primary</field>
+			<field eval="7" name="priority" />
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="arch" type="xml">
+			<!-- <xpath expr="//field[@name='type']" position="before">
+				<field name="amazon_categ_id" />
+				</xpath> -->
+				<form position="attributes">
+					<attribute name="string">Product Variant</attribute>
+				</form>
+				<field name="active" position="after">
+					<field name="default_code" />
+					<field name="qty_override" />
+					<field name="amazon_price_new" />
+					<field name="price_amazon_current" />
+				</field>
+			</field>
+		</record>
+		
+		<record id="amazon_product_product_tree_view_inherit_id" model="ir.ui.view">
+            <field name="name">product.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <tree string="Product Variants">
+                    <field name="default_code"/>
+                    <field name="amazon_product" />
+					<field name="small_image_url"/>
+                    <field name="name"/>
+                    <field name="attribute_value_ids" widget="many2many_tags" groups="product.group_product_variant"/>
+                    <field name="lst_price" invisible="1"/>
+                    <field name="amazon_price"  string="Amazon Price"/>
+                    <field name="uom_id" options="{'no_open': True, 'no_create': True}" groups="product.group_uom"/>
+<!--                     <field name="barcode"/>
+ -->                    <field name="product_tmpl_id" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+		<record id="amazon_product_template_action_inherit" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">tree,form,kanban</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="product.product_template_search_view" />
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+
+
+
+		<record id="amazon_product_normal_action_inherit" model="ir.actions.act_window">
+			<field name="name">Product Variants</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.product</field>
+			<field name="view_mode">tree,form,kanban</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="product.product_search_form_view" />
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+
+		<!-- <record model="ir.actions.act_window" id="action_amazon_product_view">
+			<field name="name">Amazon Products</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False" />
+			<field name="domain" eval="[('amazon_product','=',True)]" />
+			<field name="context">{'default_amazon_product':True}</field>
+		</record> -->
+		<!-- Changes -->
+		<!-- <record model="ir.actions.act_window.view" id="action_amazon_product_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="amazon_product_product_tree_view_inherit_id"/>
+            <field name="act_window_id" ref="action_amazon_product_view"/>
+        </record>
+
+		<record model="ir.actions.act_window.view" id="action_amazon_product_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product_normal_form_view_inherit"/>
+            <field name="act_window_id" ref="action_amazon_product_view"/>
+        </record> -->
+
+		<record model="ir.actions.act_window" id="action_amazon_product_updated">
+			<field name="name">Products Updated</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False"/>
+			<field name="domain" eval="[('amazon_product','=',True),('update_data','=',True)]"/>
+		</record>
+		<record model="ir.actions.act_window" id="action_amazon_product_ntupdated">
+			<field name="name">Products To Exported</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False" />
+			<field name="domain" eval="[('amazon_product','=',True),('update_data','!=',True)]"/>
+		</record>
+</odoo>
+
+
+
+
+
+
+<!-- old code -->
+
+
+<!-- <odoo>
+		Amazon Category views
+
+		<record id="amazon_product_category_from_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.from.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<form string="Category">
+					<div class="oe_title">
+						<label for="name" string="Category name" class="oe_edit_only" />
+						<h1>
+							<field name="name" placeholder="eg. Tricycle" />
+						</h1>
+					</div>
+					<group name="first" col="4" string="Category Type">
+						<field name="parent_id" domain="[('amazon_category', '=', True)]" />
+						<field name="type" />
+					</group>
+					<group name="Amazon Information">
+						<field name="amazon_category" readonly="4"></field>
+						<field name="amazon_cat_id" readonly="4"></field>
+					</group>
+					<group name="shops" string="Shops">
+						<field name="shop_ids" nolabel="1" colspan="4"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		
+		<record id="amazon_product_category_tree_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.tree.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<tree string="Category">
+					<field name="display_name" />
+					<field name="amazon_category" />
+					<field name="amazon_cat_id" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="amazon_product_category_search_view" model="ir.ui.view">
+			<field name="name">amazon.product.category.search.view</field>
+			<field name="model">product.category</field>
+			<field name="arch" type="xml">
+				<search string="Category">
+					<field name="name" />
+				</search>
+			</field>
+		</record>
+		
+		<record model="ir.actions.act_window" id="amazon_action_product_category_action">
+			<field name="name">Amazon Category</field>
+			<field name="res_model">product.category</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('amazon_category', '=', True)]</field>
+			<field name="search_view_id"
+				ref="amazon_connector.amazon_product_category_search_view" />
+		</record>
+
+		<record model="ir.actions.act_window.view" id="amazon_action_product_category_tree_view">
+			<field name="sequence" eval="1" />
+			<field name="view_mode">tree</field>
+			<field name="view_id"
+				ref="amazon_connector.amazon_product_category_tree_view" />
+			<field name="act_window_id"
+				ref="amazon_connector.amazon_action_product_category_action" />
+		</record>
+
+		<record model="ir.actions.act_window.view" id="amazon_action_product_category_form_view">
+			<field name="sequence" eval="2" />
+			<field name="view_mode">form</field>
+			<field name="view_id"
+				ref="amazon_connector.amazon_product_category_from_view" />
+			<field name="act_window_id"
+				ref="amazon_connector.amazon_action_product_category_action" />
+		</record>
+		<record id="view_amazon_product_template_form" model="ir.ui.view">
+			<field name="name">product.amazon.form.inherit</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view" />
+			<field name="arch" type="xml">
+				<header>
+					<button name="ExportUpdateProduct" type="object" string="ExportUpdate"/>
+				</header>
+				<xpath expr="//div[@name='options']" position="inside">
+						<div>
+							<field name="amazon_product"/>
+							<label for="amazon_product" />
+							<field name="amazon_export"/>
+							<label for="amazon_export" />
+						</div>
+				</xpath>
+				<xpath expr="//field[@name='currency_id']" position="inside">
+					<field name="feature" />
+				</xpath>
+				<xpath expr="//field[@name='default_code']" position="before">
+					<field name="standard_temp_product" />
+				</xpath>
+				<xpath expr="//field[@name='attribute_line_ids']" position="before">
+					<group>
+					<field name="variationtheme" string="select VariationTheme" attrs="{'required':[('attribute_line_ids','!=',[])]}"/>
+					</group>
+				</xpath>
+				<xpath expr="//field[@name='default_code']" position="after">
+					<field name="amazon_sku"/>
+					<field name="tmp_asin"  attrs="{'invisible':[('standard_temp_product','!=','ASIN')]}"/>
+					<field name="upc_temp" attrs="{'invisible':[('standard_temp_product','!=','UPC')]}"/>
+					<field name="isbn_temp" attrs="{'invisible':[('standard_temp_product','!=','ISBN')]}"/>
+					<field name="ean_barcode" attrs="{'invisible':[('standard_temp_product','!=','EAN')]}"/>
+				</xpath>
+				<xpath expr="//page" position="after">
+					<page string="Amazon Information" attrs="{'invisible':[('amazon_product','=',False)]}">
+						<notebook>
+							<page string="Amazon Attributes">
+								<form string="Product Attribtes">
+									<group col="4">
+										<field name="amazon_categ_id" domain="[('amazon_category','=',True)]"/>
+										<field name="tem_standard_price"/>
+										<field name="amazon_price" />
+										<field name="label" />
+										<field name="product_type_name" />
+										<field name="color" />
+										<field name="binding"/>
+										<field name="brand_name" />
+										<field name="studio" />
+										<field name="amazon_manufacturer" />
+										<field name="publisher" />
+										<field name="package_quantity" />
+										<separator colspan="4" string="Item Dimension" />
+										<field name="item_length" />
+										<field name="item_width" />
+										<field name="item_weight" />
+										<field name="item_height" />
+										<separator colspan="4" string="Package Dimension" />
+										<field name="package_dimension_length" />
+										<field name="package_dimension_width" />
+										<field name="package_dimension_weight" />
+										<field name="package_dimension_height" />
+										<separator colspan="4" string="Product Image Dimensions" />
+										<field name="small_image_url" />
+										<field name="small_image_height" />
+										<field name="small_image_width" />
+										</group>
+										<group>
+										<field name="item_type"/>
+										<field name="bullet_point">
+											<tree editable="bottom">
+													<field name="bullet"/>
+											</tree>
+										</field>
+										<field name="search_keywords">
+											<tree editable="bottom">
+												<field name="searchterm"/>
+											</tree>
+										</field>
+									</group>
+								</form>
+							</page>
+							<page string="Amazon Product Listing">
+								<form string="Product Attribtes">
+									<separator colspan="4" string="Product Listing" />
+									<field name="amazon_prodlisting_ids"
+										context="{'default_product_id': active_id,'new_lstn': True}" />
+								</form>
+							</page>
+							<page name="shop_prices" string="Prices">
+								<field name="product_shop_price_ids" nolable="1" position="after">
+									<tree>	
+										<field name="shop_id" />
+										<field name="price" />
+									</tree>
+								</field>
+							</page>
+						</notebook>
+					</page>
+				</xpath>
+			</field>
+		</record>
+
+
+		Product Form View
+		<record id="view_amazon_product_product_form" model="ir.ui.view">
+			<field name="name">product.amazon.form.inherit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="arch" type="xml">
+				<div name="button_box" position="inside">
+					<button class="oe_stat_button" name="action_view_amazon_log"
+						attrs="{'invisible': [('amazon_product_model_count', '=', 0)]}"
+						type="object" icon="fa-usd">
+						<field string="Logs" name="amazon_product_model_count"
+							widget="statinfo" />
+					</button>
+				</div>
+				<xpath expr="//field[@name='default_code']" position="before">
+					<field name="standard_temp_product" />
+				</xpath>
+				<xpath expr="//field[@name='default_code']" position="after">
+					<field name="asin" attrs="{'invisible':[('standard_temp_product','!=','ASIN')]}"/>
+					<field name="amazon_sku"/>
+					<field name="ean_barcode" attrs="{'invisible':[('standard_temp_product','!=','EAN')]}"/>
+					<field name="upc" attrs="{'invisible':[('standard_temp_product','!=','UPC')]}"/>
+					<field name="isbn" attrs="{'invisible':[('standard_temp_product','!=','ISBN')]}"/>
+				</xpath>
+			
+				<xpath expr="//page" position="inside">
+					<page string="Amazon Information" attrs="{'invisible':[('amazon_product','=',False)]}">
+						<notebook>
+							<page string="Amazon Attributes">
+								<form string="Product Attribtes">
+									<group col="4">
+										<field name="amazon_categ_id" domain="[('amazon_category','=',True)]"/>
+										<field name="amazon_standard_price" />
+										<field name="label" />
+										<field name="product_type_name" />
+										<field name="color" />
+										<field name="style_name"/>
+										<field name="brand_name"/>
+										<field name="studio" />
+										<field name="variationtheme" string="select VariationTheme"/>
+										<field name="amazon_manufacturer" />
+										<field name="manufacturer_part" />
+										<field name="publisher" />
+										<field name="package_quantity" />
+										<separator colspan="4" string="Item Dimension" />
+										<field name="item_length" />
+										<field name="item_width" />
+										<field name="item_weight" />
+										<field name="item_height" />
+										<separator colspan="4" string="Package Dimension" />
+										<field name="package_length" />
+										<field name="package_width" />
+										<field name="package_weight" />
+										<field name="package_height" />
+										<field name="shipping_weight" />
+										<field name="shipping_weight_uom" />
+										<separator colspan="4" string="Product Image Dimensions" />
+										<field name="small_image_url" />
+										<field name="small_image_height" />
+										<field name="small_image_width" />
+										<separator colspan="4" string="Material Type" />
+										<field name="material_type" />
+										
+									</group>
+								</form>
+							</page>
+							<page string="Amazon Product Listing">
+								<form string="Product Attribtes">
+									<separator colspan="4" string="Product Listing" />
+									<field name="amazon_prodlisting_ids"
+										context="{'default_product_id': active_id,'new_lstn': True}" />
+								</form>
+							</page>
+						</notebook>
+					</page>
+				</xpath>
+				<xpath expr="//field[@name='purchase_ok']" position="after">
+					<div class="oe_left" name="options">
+						<div>
+							<field name="amazon_product"/>
+							<label for="amazon_product" />
+							<field name="amazon_export" />
+							<label for="amazon_export" />
+						</div>
+					</div>
+				</xpath>
+			</field>
+		</record>
+		<record id="view_amazon_product_listing_tree" model="ir.ui.view">
+			<field name="name">amazon.product.listing</field>
+			<field name="model">amazon.product.listing</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Product Amazon Listing">
+					<field name="shop_id" />
+					<field name="name" />
+					<field name="new_lstn" invisible="1" />
+					<field name="title" invisible="1" />
+					<field name="default_code" />
+					<field name="asin" />
+					<field name="listing_id" invisible="1" />
+					<field name="quantity" invisible="1" />
+					<field name="currency_id" />
+					<field name="price" invisible="1" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="view_product_filter" model="ir.ui.view">
+			<field name="name">product.product.list</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_search_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<filter string="Exported Product" name="exported_product"
+						domain="[('amazon_product','=',True),('updated_data','=',True)]" help="Product that has been Exported" />
+						
+					<filter string="Product To Exported" name="draft"
+						domain="[('amazon_product','=',True),('updated_data','!=',True)]" help="Product that has to be Exported" />
+				</xpath>
+			</field>
+		</record>
+		<record id="view_amazon_product_listing_form" model="ir.ui.view">
+			<field name="name">amazon.product.listing</field>
+			<field name="model">amazon.product.listing</field>
+			<field name="context" eval="{'default_new_lstn': True}" />
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Product Amazon Listing">
+
+					<sheet>
+						<group cols="4">
+							<field name="shop_id"/>
+							<field name="new_lstn" invisible="1" context="{'new_lstn': True}" />
+							<field name="name" />
+							<field name="title"/>
+							<field name="default_code" />
+							<field name="fulfillment_by" />
+							<field name="asin"/>
+							<field name="code_type"/>
+							<field name="currency_id"/>
+							<field name="price"/>
+							<field name="quantity"/>
+							<field name="amazon_condition" />
+							<field name="condition"/>
+							<field name="prod_dep"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<record id="amazon_product_template_tree_view_inherit" model="ir.ui.view">
+			<field name="name">product.product.product.tree</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_tree_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='categ_id']" position="after">
+
+					<field name="small_image_url" />
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="product.product_template_action" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="product.product_template_kanban_view" />
+			<field name="domain">[('amazon_product','=',False)]</field>
+			<field name="context">{"search_default_filter_to_sell":1}</field>
+		</record>
+
+		<record id="amazon_product_template_action" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_type">form</field>
+			<field name="view_id" ref="product.product_template_kanban_view" />
+			<field name="context">{"search_default_filter_to_sell":1}</field>
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+		Product Product Views
+		
+		<record id="amazon_product_product_action" model="ir.actions.act_window">
+            <field name="name">Product Variants</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="product.product_kanban_view" />
+            <field name="context">{"search_default_filter_to_purchase": 1}</field>
+            <field name="domain">[('amazon_product','=',True)]</field>
+        </record>
+
+
+		<record id="product_normal_form_view_inherit" model="ir.ui.view">
+			<field name="name">product.product.form</field>
+			<field name="model">product.product</field>
+			<field name="mode">primary</field>
+			<field eval="7" name="priority" />
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+			<field name="arch" type="xml">
+			<xpath expr="//field[@name='type']" position="before">
+				<field name="amazon_categ_id" />
+				</xpath>
+				<form position="attributes">
+					<attribute name="string">Product Variant</attribute>
+				</form>
+				<field name="active" position="after">
+					<field name="default_code" />
+					<field name="qty_override" />
+					<field name="amazon_price_new" />
+					<field name="price_amazon_current" />
+				</field>
+			</field>
+		</record>
+		
+		<record id="amazon_product_product_tree_view_inherit_id" model="ir.ui.view">
+            <field name="name">product.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="arch" type="xml">
+                <tree string="Product Variants">
+                    <field name="default_code"/>
+                    <field name="amazon_product" />
+					<field name="small_image_url"/>
+                    <field name="name"/>
+                    <field name="attribute_value_ids" widget="many2many_tags" groups="product.group_product_variant"/>
+                    <field name="lst_price" invisible="1"/>
+                    <field name="amazon_price"  string="Amazon Price"/>
+                    <field name="uom_id" options="{'no_open': True, 'no_create': True}" groups="product.group_uom"/>
+                    <field name="barcode"/>
+                    <field name="product_tmpl_id" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+		<record id="amazon_product_template_action_inherit" model="ir.actions.act_window">
+			<field name="name">Products</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.template</field>
+			<field name="view_mode">tree,form,kanban</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="product.product_template_search_view" />
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+
+
+
+		<record id="amazon_product_normal_action_inherit" model="ir.actions.act_window">
+			<field name="name">Product Variants</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.product</field>
+			<field name="view_mode">tree,form,kanban</field>
+			<field name="view_type">form</field>
+			<field name="search_view_id" ref="product.product_search_form_view" />
+			<field name="domain">[('amazon_product','=',True)]</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_amazon_product_view">
+			<field name="name">Amazon Products</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False" />
+			<field name="domain" eval="[('amazon_product','=',True)]" />
+			<field name="context">{'default_amazon_product':True}</field>
+		</record>
+		Changes
+		<record model="ir.actions.act_window.view" id="action_amazon_product_tree_view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="amazon_product_product_tree_view_inherit_id"/>
+            <field name="act_window_id" ref="action_amazon_product_view"/>
+        </record>
+
+		<record model="ir.actions.act_window.view" id="action_amazon_product_form_view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="product_normal_form_view_inherit"/>
+            <field name="act_window_id" ref="action_amazon_product_view"/>
+        </record>
+
+		<record model="ir.actions.act_window" id="action_amazon_product_updated">
+			<field name="name">Products Updated</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False"/>
+			<field name="domain" eval="[('amazon_product','=',True),('update_data','=',True)]"/>
+		</record>
+		<record model="ir.actions.act_window" id="action_amazon_product_ntupdated">
+			<field name="name">Products To Exported</field>
+			<field name="res_model">product.product</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="view_id" eval="False" />
+			<field name="domain" eval="[('amazon_product','=',True),('update_data','!=',True)]"/>
+		</record>
+</odoo>
+
+ -->

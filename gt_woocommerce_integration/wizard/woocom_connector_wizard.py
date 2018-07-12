@@ -42,6 +42,8 @@ class WoocommerceConnectorWizard(models.TransientModel):
 
     # update fields
     update_categories=fields.Boolean("Update Categories")
+    update_customers=fields.Boolean("Update Customers Data")
+
     update_product_data = fields.Boolean('Update Product Data')
     update_woocom_product_inventory = fields.Boolean(string="Update Product Inventory")
     update_order_status = fields.Boolean('Update Order Status')
@@ -112,6 +114,11 @@ class WoocommerceConnectorWizard(models.TransientModel):
        
         if self.update_categories:
             self.shop_ids.updateWoocomCategory()
+
+
+        if self.update_customers:
+            self.shop_ids.updateWoocomCustomer()
+
 # #           
         if self.update_product_data:
             self.shop_ids.updateWoocomProduct()

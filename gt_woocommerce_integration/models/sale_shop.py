@@ -16,6 +16,7 @@
 #
 ##############################################################################
 
+import urllib.request
 from odoo import api, fields, models, _
 from odoo.addons.gt_woocommerce_integration.api import API
 from odoo.addons.gt_woocommerce_integration.api import woocom_api
@@ -23,7 +24,9 @@ import logging
 from datetime import timedelta, datetime, date, time
 import time
 logger = logging.getLogger('__name__')
-import urllib
+# import urllib
+# import requests
+# from urllib import urlopen
 import base64
 import sys, json
 from odoo.exceptions import UserError
@@ -79,6 +82,7 @@ class SaleShop(models.Model):
     auto_update_order_status = fields.Boolean(string="Auto Update Order Status", default=True)
     auto_update_product_data = fields.Boolean(string="Auto Update Product data", default=True)
     auto_update_price = fields.Boolean(string="Auto Update Price", default=True)
+    auto_update_customer_data  = fields.Boolean(string="Auto Update Customer", default=True)
 
     # Import last date
     last_woocommerce_inventory_import_date = fields.Datetime(srting='Last Inventory Import Time')
@@ -93,6 +97,8 @@ class SaleShop(models.Model):
 
     # Update last date
     woocommerce_last_update_category_date = fields.Datetime(srting='Woocom last update category date')
+    woocommerce_last_update_customer_date = fields.Datetime(srting='Woocom last update customer date')
+
     woocommerce_last_update_inventory_date = fields.Datetime(srting='Woocom last update inventory date')
     woocommerce_last_update_catalog_rule_date = fields.Datetime(srting='Woocom last update catalog rule date')
     woocommerce_last_update_product_data_date = fields.Datetime(srting='Woocom last update product data rule date')
@@ -390,21 +396,25 @@ class SaleShop(models.Model):
 
 
         if images_list:
-           for imgs in images_list:
-               loc = imgs.get('src').split('/')
-               image_name = loc[len(loc) - 1]
-               img_vals = {
+
+            for imgs in images_list:
+                loc = imgs.get('src').split('/')
+                image_name = loc[len(loc) - 1]
+                img_vals = {
                      'name': image_name,
                      'link': True ,
                      'url':imgs.get('src'),
                      'woocom_img_id' : imgs.get('id')
-               } 
-               if count == 1:
-                   file_contain = urllib.urlopen(imgs.get('src')).read()
-                   image_data = base64.b64encode(file_contain)
-                   prd_tmp_vals.update({'image_medium': image_data})
-               img_ids.append((0, 0, img_vals))
-           prd_tmp_vals.update({'woocom_product_img_ids':img_ids})
+                } 
+                if count == 1:
+                    (filename, header) = urllib.request.urlretrieve(imgs.get('src'))
+                    f = open(filename, 'rb')
+                    img = base64.encodestring(f.read())
+                    prd_tmp_vals.update({'image':img})
+                    f.close()
+                img_ids.append((0, 0, img_vals))
+            prd_tmp_vals.update({'woocom_product_img_ids':img_ids})
+              
 
 
 
@@ -1910,6 +1920,72 @@ class SaleShop(models.Model):
                 })
                 categ_url = 'products/categories/' + str(each.woocom_id)
                 cat_vals = wcapi.post(categ_url, cat_vals)
+
+
+
+    @api.multi
+    def updateWoocomCustomer(self):
+        print ("updatecustttttttttttttt")
+
+        cust_obj = self.env['res.partner']
+        for shop in self:
+            print ("shoppppppppppppppp",shop) 
+
+            wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
+            if shop.woocommerce_last_update_customer_date:
+                customer_ids = cust_obj.search([('write_date','>', shop.woocommerce_last_update_customer_date),('woocom_id','!=',False)])
+                print ("custidssssss11111111",customer_ids)
+            else:
+                customer_ids = cust_obj.search([('woocom_id','!=',False)])
+                print ("custidssssss22222222",customer_ids)
+            
+            for each in customer_ids:
+                customer_name = each.name
+                name_list = customer_name.split(' ')
+                first_name = name_list[0]
+                if len(name_list) > 1:
+                    last_name = name_list[1]
+                else:
+                    last_name = name_list[0]
+
+                cust_vals= ({
+                            'id': each.woocom_id,
+                            'name': each.name,
+                            'parent': each.parent_id and str(each.parent_id.woocom_id) or '0',
+                            "email":str(each.email),
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "password" : str(each.email) ,
+                            "billing": {
+                                "first_name": first_name,
+                                "last_name": last_name,
+                                "company": str(each.parent_id.name),
+                                "address_1": each.street  or '',
+                                "address_2": each.street2  or '',
+                                "city": each.city or '',
+                                "state": str(each.state_id.code),
+                                "postcode": str(each.zip) or '',
+                                "country": str(each.country_id.code),
+                                "email": str(each.email),
+                                "phone": str(each.phone),
+                            },
+                            "shipping": {
+                                "first_name":first_name,
+                                "last_name": last_name,
+                                "company": str(each.parent_id.name),
+                                "address_1": each.street  or '',
+                                "address_2": each.street2  or '',
+                                "city": each.city or '',
+                                "state": str(each.state_id.code),
+                                "postcode": str(each.zip) or '',
+                                "country": str(each.country_id.code)
+                            }
+                })
+                print ("custvalsssssssssssss",cust_vals)
+
+                cust_url = 'customers/' + str(each.woocom_id)
+                cust_vals = wcapi.post(cust_url, cust_vals)
+
                 
 
 
@@ -2149,24 +2225,6 @@ class SaleShop(models.Model):
                      'status' : 'completed',
 
                 }
-
-                # data1 = {
-                #     'key':'_aftership_tracking_number',
-                #     'value': sale_order.picking_ids.carrier_tracking_ref,
-                # }
-                # data2 = {
-                #     'key':'_aftership_tracking_shipdate',
-                #     'value': sale_order.picking_ids.scheduled_date,
-                # }
-                # data3 = {
-                #     'key':'_aftership_tracking_postal',
-                #     'value': sale_order.picking_ids.partner_id.zip,
-                # }
-                # track_list.append(data1)
-                # track_list.append(data2)
-                # track_list.append(data3)
-                # order_vals.update({'meta_data': track_list})
-
 
                 ord_res = wcapi.post(ordr_url, order_vals).json()
                 if ord_res:
@@ -2493,3 +2551,53 @@ class SaleShop(models.Model):
                             if prod_var_res:    
                                 variant.write({'woocom_variant_id': prod_var_res.get('id'),'product_to_be_exported': False})
                     
+
+
+
+    @api.model
+    def auto_scheduler_process_import_orders(self, cron_mode=True):
+        print "SCHEDULAR_import_orderssssssssss"
+        search_ids = self.search([('auto_import_order', '=', True)])
+        if search_ids:
+            search_ids.importWoocomOrder()
+
+
+    @api.model
+    def auto_scheduler_process_import_products(self, cron_mode=True):
+        print "SCHEDULAR_import_productsssssssssssssssss"
+        search_ids = self.search([('auto_import_products', '=', True)])
+        if search_ids:
+            search_ids.importWoocomProduct()
+
+
+    @api.model
+    def auto_scheduler_process_update_inventory(self, cron_mode=True):
+        print "SCHEDULAR_update_inventoryyyyyyyyyy"
+        search_ids = self.search([('auto_update_inventory', '=', True)])
+        if search_ids:
+            search_ids.importWoocomInventory()
+
+
+    @api.model
+    def auto_scheduler_process_update_orders(self, cron_mode=True):
+        print "SCHEDULAR_update_orderssssssssssss"
+        search_ids = self.search([('auto_update_order_status', '=', True)])
+        if search_ids:
+            search_ids.updateWoocomOrderStatus()
+
+
+    @api.model
+    def auto_scheduler_process_update_products(self, cron_mode=True):
+        print "SCHEDULAR_update_productsssssssss"
+        search_ids = self.search([('auto_update_product_data', '=', True)])
+        if search_ids:
+            search_ids.updateWoocomProduct()
+
+
+    @api.model
+    def auto_scheduler_process_update_customers(self, cron_mode=True):
+        print "SCHEDULAR_update_customerssssssssss"
+        search_ids = self.search([('auto_update_customer_data', '=', True)])
+        if search_ids:
+            search_ids.updateWoocomCustomer()
+        

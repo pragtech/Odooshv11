@@ -144,6 +144,13 @@
 										   style="font-weight: bold;" />
 									<field name="auto_update_product_data" class="oe_inline" />
 								</div>
+
+								<div name="auto_update_customer_data">
+									<label for="auto_update_customer_data" string="Auto Update Customer data"
+										   style="font-weight: bold;" />
+									<field name="auto_update_customer_data" class="oe_inline" />
+								</div>
+
 							</div>
 						</group>
 						<notebook>

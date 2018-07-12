@@ -35,6 +35,8 @@
 
 					<group name="update" string="Update" invisible="context.get('from_import', False) or context.get('from_export', False)">
 						<field name="update_categories"/>
+						<field name="update_customers"/>
+						
 						<field name="update_product_data" />
 						<label for="update_product_data" string="(Includes Updation of Products,Images and Variants)"></label>
 						<newline/>

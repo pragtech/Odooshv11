@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record forcecreate="True" id="ir_cron_import_orders_scheduler_action" model="ir.cron">
+            <field name="name">Import Orders</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_import_orders()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+        </record>
+
+
+        <record forcecreate="True" id="ir_cron_import_products_scheduler_action" model="ir.cron">
+            <field name="name">Import Products</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_import_products()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+        </record>
+
+        <record forcecreate="True" id="ir_cron_update_inventory_scheduler_action" model="ir.cron">
+            <field name="name">Import Products Inventory</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_update_inventory()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+        </record>
+
+        <record forcecreate="True" id="ir_cron_update_orders_scheduler_action" model="ir.cron">
+            <field name="name">Update Orders Status</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_update_orders()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+        </record>
+
+        <record forcecreate="True" id="ir_cron_update_products_scheduler_action" model="ir.cron">
+            <field name="name">Update Products Data</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_update_products()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>           
+        </record>
+
+
+         <record forcecreate="True" id="ir_cron_update_customer_scheduler_action" model="ir.cron">
+            <field name="name">Update Customers Data</field>
+            <field name="model_id" ref="model_sale_shop"/>
+            <field name="state">code</field>
+            <field name="code">model.auto_scheduler_process_update_customers()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">60</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall"/>
+
+            <!-- <field eval="False" name="active"/>
+            <field ref="model_sale_shop" name="model"/>
+            <field eval="'auto_scheduler_process_update_customers'" name="function"/>
+            <field eval="'()'" name="args"/> -->
+        </record>
+
+
+    </data>
+</odoo>
+
