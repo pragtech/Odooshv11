@@ -152,7 +152,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def importWoocomAttribute(self):
-        print ("IMPORT_ATRRRRRRRRRRRRRRr")
+        # print ("IMPORT_ATRRRRRRRRRRRRRRr")
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=False, version='v3')
 #             try:
@@ -256,7 +256,7 @@ class SaleShop(models.Model):
             if not parent_category_check:
                 if int(category.get('parent')) != 0:
                     cat_url = 'products/categories/' + str(category.get('parent'))
-                    print ("cat_url=========>",cat_url)
+                    # print ("cat_url=========>",cat_url)
                     valsss = wcapi.get(cat_url)
                     valsss = valsss.json()
                
@@ -328,7 +328,7 @@ class SaleShop(models.Model):
     
     @api.one
     def create_woocom_product(self, product, wcapi):
-        print ("CEATE PRODUCTTTTTTTTTTTT",product)
+        # print ("CEATE PRODUCTTTTTTTTTTTT",product)
 
         prod_temp_obj = self.env['product.template']
         product_obj = self.env['product.product']
@@ -337,7 +337,7 @@ class SaleShop(models.Model):
         category_obj = self.env['woocom.category']
         tag_obj = self.env['product.tags']
         product_att_line_obj = self.env['product.attribute.line']
-        print ("product.get('nameeeeeeeeeeeeeeeeeeeee')",product.get('name'))
+        # print ("product.get('nameeeeeeeeeeeeeeeeeeeee')",product.get('name'))
         prd_tmp_vals = {
             'name': product.get('name'),
             'type': 'product',
@@ -530,7 +530,7 @@ class SaleShop(models.Model):
 #     
     @api.multi
     def importWoocomProduct(self):
-        print ("IMPORTTTTPRODUCTTTTTTTT",self)
+        # print ("IMPORTTTTPRODUCTTTTTTTT",self)
 
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
@@ -552,7 +552,7 @@ class SaleShop(models.Model):
          
     @api.one
     def create_woo_inventory(self, loc_id , qty , product):
-        print ("create_woo_inventoryyyyyy",qty, product)
+        # print ("create_woo_inventoryyyyyy",qty, product)
         
         inv_wiz = self.env['stock.change.product.qty']
         if qty > 0:
@@ -568,16 +568,16 @@ class SaleShop(models.Model):
 
     @api.multi
     def CreateWoocomInventory(self, product_list, wcapi):
-        print ("CreateWoocomInventoryyyyyyyyyyyy")
+        # print ("CreateWoocomInventoryyyyyyyyyyyy")
 
         inventory_list = []
     
         for prod_dict in product_list:
             if isinstance(prod_dict, dict):
-                print ("prod_dictttttttttttttttttttt")
+                # print ("prod_dictttttttttttttttttttt")
                 product_vrt = prod_dict.get('variations', [])
                 if product_vrt:
-                    print ("iiiiiffffffffproduct_vrt")
+                    # print ("iiiiiffffffffproduct_vrt")
 
                     for variant in product_vrt:
                         prod_url = 'products/' + str(prod_dict.get('id')) + "/variations/" + str(variant)
@@ -610,7 +610,7 @@ class SaleShop(models.Model):
                                 # print ("elseeeeeeeeeee*******")
                                 continue
                 else:
-                    print ("======ELSEEEEEEEE=========")
+                    # print ("======ELSEEEEEEEE=========")
                     pro_ids = self.env['product.product'].search([('product_tmpl_id.woocom_id', '=', prod_dict.get('id'))])
                     # print ("pro_idsELSEEEEEEEEEE1111111111111",pro_ids,pro_ids.name)
 
@@ -643,13 +643,15 @@ class SaleShop(models.Model):
         
     @api.multi
     def importWoocomInventory(self):
-        print ("importWoocomInventoryyyyyyyyyy")
+        # print ("importWoocomInventoryyyyyyyyyy")
 
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
             # print ("WCPIIIIIII22222",wcapi)
             count = 1
             products = wcapi.get("products")
+            # print ("productsssssssssssssss",products) 
+
             if products.status_code != 200:
                 raise UserError(_("Enter Valid url"))
             
@@ -677,7 +679,7 @@ class SaleShop(models.Model):
 
     @api.one
     def create_woo_customer(self, customer_detail, wcapi):
-        print ("create_woo_customereeeeeeee=======>>>")
+        # print ("create_woo_customereeeeeeee=======>>>")
 
         res_partner_obj = self.env['res.partner']
         country_obj = self.env['res.country']
@@ -770,18 +772,18 @@ class SaleShop(models.Model):
 
             vals.update({'child_ids' : add_lines})
             customer_ids = res_partner_obj.search([('woocom_id', '=', customer_detail.get('id')),('email','=',customer_detail.get('email'))])
-            print ("customer_ids1111111111",customer_ids) 
+            # print ("customer_ids1111111111",customer_ids) 
             if not customer_ids:
                 cust_id = res_partner_obj.create(vals)
-                print ("customer_ids222222",cust_id) 
+                # print ("customer_ids222222",cust_id) 
             else:
                 cust_id = customer_ids[0]
-                print ("customer_ids3333333",cust_id) 
+                # print ("customer_ids3333333",cust_id) 
                 logger.info('customer id ===> %s', cust_id.name)
                 vals.pop('child_ids')
                 cust_id.write(vals)
             if cust_id:
-                print ("customer_ids444444444",cust_id) 
+                # print ("customer_ids444444444",cust_id) 
                 self.env.cr.execute("select cust_id from customer_shop_rel where cust_id = %s and shop_id = %s" % (cust_id.id, self.id))
                 cust_data = self.env.cr.fetchone()
         return cust_id
@@ -789,7 +791,7 @@ class SaleShop(models.Model):
     
     @api.multi
     def importWoocomCustomer(self):
-        print ("importWoocomCustomerrrrrrrrrr=======>>>")
+        # print ("importWoocomCustomerrrrrrrrrr=======>>>")
         
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
@@ -810,7 +812,7 @@ class SaleShop(models.Model):
     
     @api.one
     def create_woo_carrier(self, carrier, wcapi):
-        print ("create_woo_carrierrrrrrrrrr")
+        # print ("create_woo_carrierrrrrrrrrr")
 
         carrier_obj = self.env['delivery.carrier']
         partner_obj = self.env['res.partner']
@@ -844,24 +846,24 @@ class SaleShop(models.Model):
 
     @api.multi
     def importWoocomCarrier(self):
-        print ("IMPORTCARRRRRRRR")
+        # print ("IMPORTCARRRRRRRR")
         for shop in self:
-            print ("Shoppppppppppppppp",shop)
+            # print ("Shoppppppppppppppp",shop)
 
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
-            print ("wcapiiiiiiiiiiiiii",wcapi)
+            # print ("wcapiiiiiiiiiiiiii",wcapi)
 
             carriers = wcapi.get("shipping_methods")
-            print ("Shoppppppppppppppp",shop)
+            # print ("Shoppppppppppppppp",shop)
 
             if carriers.status_code != 200:
                 raise UserError(_("Enter Valid url"))
 
             carriers_list = carriers.json()
-            print ("carriers_listttttttttttt",carriers_list)
+            # print ("carriers_listttttttttttt",carriers_list)
 
             for carrier in carriers_list:
-                print ("carrierrrrrrrrrrrr",carrier)
+                # print ("carrierrrrrrrrrrrr",carrier)
 
                 shop.create_woo_carrier(carrier, wcapi)
         return True
@@ -898,7 +900,7 @@ class SaleShop(models.Model):
     
     
     def woocomManageOrderWorkflow(self, saleorderid, order_detail, status):
-        print("WORKFLOWWWWWWWWWWW",saleorderid,status)
+        # print("WORKFLOWWWWWWWWWWW",saleorderid,status)
 
         invoice_obj = self.env['account.invoice']
         invoice_refund_obj = self.env['account.invoice.refund']
@@ -1123,7 +1125,7 @@ class SaleShop(models.Model):
 
     @api.one
     def woocomManageCoupon(self, orderid, coupon_detail, wcapi):
-        print ("woocomManageCouponnnnnnnnn",coupon_detail)
+        # print ("woocomManageCouponnnnnnnnn",coupon_detail)
 
         sale_order_line_obj = self.env['sale.order.line']
         coupon_obj = self.env['woocom.coupons']
@@ -1268,7 +1270,7 @@ class SaleShop(models.Model):
 
     @api.one
     def getTaxesAccountID(self,each_result,order_id,unit_price):
-        print ("getTaxesAccountIDDDDDDDD")
+        # print ("getTaxesAccountIDDDDDDDD")
 
         accounttax_obj = self.env['account.tax']
         accounttax_id = False
@@ -1294,7 +1296,7 @@ class SaleShop(models.Model):
           
     @api.one
     def create_woo_order(self, order_detail, wcapi):
-        print ("create_woo_orderrrrwwwwwwwwwwwww",order_detail)
+        # print ("create_woo_orderrrrwwwwwwwwwwwww",order_detail)
 
         sale_order_obj = self.env['sale.order']
         res_partner_obj = self.env['res.partner']
@@ -1430,7 +1432,7 @@ class SaleShop(models.Model):
         
     @api.multi
     def importWoocomOrder(self):
-        print ("importOrderrrrrrrrrrrrrr===========>")
+        # print ("importOrderrrrrrrrrrrrrr===========>")
         sale_order_obj = self.env['sale.order']
 
         for shop in self:
@@ -1481,7 +1483,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def importRefundOrder(self):
-        print ("importRefundOrderrrrrrrrrrrrrrrrr===========>",self)
+        # print ("importRefundOrderrrrrrrrrrrrrrrrr===========>",self)
         sale_order_obj = self.env['sale.order']
 
         for shop in self:
@@ -1537,7 +1539,7 @@ class SaleShop(models.Model):
                 # count += 1
                 # print ("COUNTTTTTTTTTTRRRRRRR22222",count)
                 orders_list = orders_list.json()
-                print ("----------------------------------------------------",len(orders_list))
+                # print ("----------------------------------------------------",len(orders_list))
         return True
 
 
@@ -1546,7 +1548,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def importWoocomOrderRefund(self, order_detail, saleorderid):
-        print ("importWoocomOrderRefundddddddddd===========>",order_detail)
+        # print ("importWoocomOrderRefundddddddddd===========>",order_detail)
 
         invoice_obj = self.env['account.invoice']
         invoice_refund_obj = self.env['account.invoice.refund']
@@ -1593,7 +1595,7 @@ class SaleShop(models.Model):
                             date3 = datetime.strptime(date2,'%Y-%m-%d %H:%M:%S')
                             date4 = date3.strftime('%m/%d/%Y')
                             if not refund_ids:
-                                print  ("==NOT refund_ids==>")
+                                # print  ("==NOT refund_ids==>")
                                 if invoice.state == 'paid':
                                 # if invoice.state in ['paid', 'draft']:
                                     # print ("PAIDDDDDDDDDDDD",invoice.state)
@@ -1647,7 +1649,7 @@ class SaleShop(models.Model):
                         # global counter
                         # print ("counter***************",counter)
 
-                        print ("PICINGGGGGGG=====>>>",picking.name,picking.origin)
+                        # print ("PICINGGGGGGG=====>>>",picking.name,picking.origin)
 
                         # if not picking.is_original:
                         # print ("IIIIIIIFFFFFFFFFFFFF111111",picking)
@@ -1706,7 +1708,7 @@ class SaleShop(models.Model):
 
     @api.one
     def createTags(self, tag_detail, wcapi):
-        print ("CREATEEEEEE_TAGSSSSSSSSSSSSSSS")
+        # print ("CREATEEEEEE_TAGSSSSSSSSSSSSSSS")
 
         prod_tag_obj = self.env['product.tags']
         tag_ids_list = []
@@ -1731,7 +1733,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def importTags(self):
-        print ("IMPORT_TAGSSSSSSSSSSSSSSS")
+        # print ("IMPORT_TAGSSSSSSSSSSSSSSS")
         prod_tag_obj = self.env['product.tags']
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
@@ -1787,7 +1789,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def importCoupons(self):
-        print ("IMPORT_COUPONSSSSSSSS")
+        # print ("IMPORT_COUPONSSSSSSSS")
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
             # print ("wcapiiiiiiiiiiiiiiiiiiiii",wcapi)
@@ -1811,7 +1813,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def updateWoocomCoupons(self):
-        print ("updateCouponssssssssss",self)
+        # print ("updateCouponssssssssss",self)
 
         coupon_obj = self.env['woocom.coupons']
         for shop in self:
@@ -1842,7 +1844,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def exportWoocomCoupons(self):
-        print ("ExportCuponsssssssssssssss")
+        # print ("ExportCuponsssssssssssssss")
         coupon_obj = self.env['woocom.coupons']
         
         for shop in self:
@@ -1925,19 +1927,19 @@ class SaleShop(models.Model):
 
     @api.multi
     def updateWoocomCustomer(self):
-        print ("updatecustttttttttttttt")
+        # print ("updatecustttttttttttttt")
 
         cust_obj = self.env['res.partner']
         for shop in self:
-            print ("shoppppppppppppppp",shop) 
+            # print ("shoppppppppppppppp",shop) 
 
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
             if shop.woocommerce_last_update_customer_date:
                 customer_ids = cust_obj.search([('write_date','>', shop.woocommerce_last_update_customer_date),('woocom_id','!=',False)])
-                print ("custidssssss11111111",customer_ids)
+                # print ("custidssssss11111111",customer_ids)
             else:
                 customer_ids = cust_obj.search([('woocom_id','!=',False)])
-                print ("custidssssss22222222",customer_ids)
+                # print ("custidssssss22222222",customer_ids)
             
             for each in customer_ids:
                 customer_name = each.name
@@ -1981,7 +1983,7 @@ class SaleShop(models.Model):
                                 "country": str(each.country_id.code)
                             }
                 })
-                print ("custvalsssssssssssss",cust_vals)
+                # print ("custvalsssssssssssss",cust_vals)
 
                 cust_url = 'customers/' + str(each.woocom_id)
                 cust_vals = wcapi.post(cust_url, cust_vals)
@@ -1991,7 +1993,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def updateWoocomProductTag(self):
-        print ("updateWoocomProducsTagggggggggggg",self)
+        # print ("updateWoocomProducsTagggggggggggg",self)
 
         tag_obj = self.env['product.tags']
         for shop in self:
@@ -2205,7 +2207,7 @@ class SaleShop(models.Model):
                 
     @api.multi
     def updateWoocomOrderStatus(self):
-        print ("updateWoocomOrderStatusssssssssswwwwwwwwwww",self)
+        # print ("updateWoocomOrderStatusssssssssswwwwwwwwwww",self)
 
         sale_order_obj = self.env['sale.order']
         status_obj = self.env['woocom.order.status']
@@ -2233,7 +2235,7 @@ class SaleShop(models.Model):
                 
     @api.multi
     def expotWoocomOrder(self):
-        print ("expotWoocomOrderrrrrrrrwwwwwwwwwwwww",self)
+        # print ("expotWoocomOrderrrrrrrrwwwwwwwwwwwww",self)
 
         sale_order_obj = self.env['sale.order']
         res_partner_obj = self.env['res.partner']
@@ -2330,7 +2332,7 @@ class SaleShop(models.Model):
                             
     @api.multi
     def exportWoocomCategories(self):
-        print ("EXPOCATTTTTTTTTTt")
+        # print ("EXPOCATTTTTTTTTTt")
         categ_obj = self.env['woocom.category']
         
         for shop in self:
@@ -2355,7 +2357,7 @@ class SaleShop(models.Model):
 
     @api.multi
     def exportWoocomProductTags(self):
-        print ("ExportTagsssssssssssssssssssssssss")
+        # print ("ExportTagsssssssssssssssssssssssss")
         tag_obj = self.env['product.tags']
         
         for shop in self:
@@ -2431,7 +2433,7 @@ class SaleShop(models.Model):
                 
     @api.multi
     def exportWoocomProduct(self):
-        print ("EXPOPRODDDDDDDD")
+        # print ("EXPOPRODDDDDDDD")
         prod_templ_obj = self.env['product.template']
         prdct_obj = self.env['product.product']
         stock_quanty = self.env['stock.quant']
@@ -2556,7 +2558,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_import_orders(self, cron_mode=True):
-        print "SCHEDULAR_import_orderssssssssss"
+        # print ("SCHEDULAR_import_orderssssssssss")
         search_ids = self.search([('auto_import_order', '=', True)])
         if search_ids:
             search_ids.importWoocomOrder()
@@ -2564,7 +2566,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_import_products(self, cron_mode=True):
-        print "SCHEDULAR_import_productsssssssssssssssss"
+        # print ("SCHEDULAR_import_productsssssssssssssssss")
         search_ids = self.search([('auto_import_products', '=', True)])
         if search_ids:
             search_ids.importWoocomProduct()
@@ -2572,7 +2574,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_update_inventory(self, cron_mode=True):
-        print "SCHEDULAR_update_inventoryyyyyyyyyy"
+        # print ("SCHEDULAR_update_inventoryyyyyyyyyy")
         search_ids = self.search([('auto_update_inventory', '=', True)])
         if search_ids:
             search_ids.importWoocomInventory()
@@ -2580,7 +2582,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_update_orders(self, cron_mode=True):
-        print "SCHEDULAR_update_orderssssssssssss"
+        # print ("SCHEDULAR_update_orderssssssssssss")
         search_ids = self.search([('auto_update_order_status', '=', True)])
         if search_ids:
             search_ids.updateWoocomOrderStatus()
@@ -2588,7 +2590,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_update_products(self, cron_mode=True):
-        print "SCHEDULAR_update_productsssssssss"
+        # print ("SCHEDULAR_update_productsssssssss")
         search_ids = self.search([('auto_update_product_data', '=', True)])
         if search_ids:
             search_ids.updateWoocomProduct()
@@ -2596,7 +2598,7 @@ class SaleShop(models.Model):
 
     @api.model
     def auto_scheduler_process_update_customers(self, cron_mode=True):
-        print "SCHEDULAR_update_customerssssssssss"
+        # print ("SCHEDULAR_update_customerssssssssss")
         search_ids = self.search([('auto_update_customer_data', '=', True)])
         if search_ids:
             search_ids.updateWoocomCustomer()

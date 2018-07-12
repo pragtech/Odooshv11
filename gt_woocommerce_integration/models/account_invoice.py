@@ -51,7 +51,7 @@ class account_invoice(models.Model):
 
     @api.multi
     def expotWoocomRefundOrder(self):
-        print ("expotWoocomREFUNDDDDDDOrder",self)
+        # print ("expotWoocomREFUNDDDDDDOrder",self)
 
         invoice_obj = self.env['account.invoice']
         invoice_refund_obj = self.env['account.invoice.refund']
@@ -59,27 +59,27 @@ class account_invoice(models.Model):
 
         for invoice in self:
             refund_ids = invoice_obj.search([('origin', '=', invoice.number)])
-            print ("refund_idsssssssssss111111111",refund_ids)
+            # print ("refund_idsssssssssss111111111",refund_ids)
 
             if refund_ids:
                 refund_ids = invoice_obj.search([('id', '=', refund_ids.refund_invoice_id.id)])
-                print ("IFFFFFFFrefund_idss",refund_ids)
+                # print ("IFFFFFFFrefund_idss",refund_ids)
 
             if not refund_ids:
                 refund_ids = invoice_obj.search([('id', '=', invoice.refund_invoice_id.id)])
-                print ("NOTTTTTrefund_idsss",refund_ids)
+                # print ("NOTTTTTrefund_idsss",refund_ids)
 
                 sale_order_id = sale_order_obj.search([('name','=',refund_ids.origin)])
-                print ("SALEIDDDDDDDDDDD",sale_order_id)
+                # print ("SALEIDDDDDDDDDDD",sale_order_id)
 
             wcapi = API(url=sale_order_id.shop_id.woocommerce_instance_id.location, consumer_key=sale_order_id.shop_id.woocommerce_instance_id.consumer_key, consumer_secret=sale_order_id.shop_id.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
-            print ("WCPIIIIIIIIIIIII",wcapi)
+            # print ("WCPIIIIIIIIIIIII",wcapi)
 
             invoice_vals = {
                  'amount' : str(self.amount_untaxed),
                  'reason' : str(self.name),
             }
-            print ("invoicevalsssssss",invoice_vals,sale_order_id.woocom_id)
+            # print ("invoicevalsssssss",invoice_vals,sale_order_id.woocom_id)
 
 
             # data = {
@@ -92,9 +92,9 @@ class account_invoice(models.Model):
 
 
             res = wcapi.post("orders/" + str(sale_order_id.woocom_id) + "/refunds", invoice_vals)
-            print ("RESSSSSSS",res)
+            # print ("RESSSSSSS",res)
             res = res.json()
-            print ("RESSS22222222",res)
+            # print ("RESSS22222222",res)
 
             if res.get('data') == 200 :    
                 invoice.write({'active_bool': 'True'})
