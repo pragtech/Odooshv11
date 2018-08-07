@@ -33,6 +33,10 @@ class WoocommerceLog(models.Model):
                                                     ('import_categories', 'Import Woocommerce product category'),
                                                     ('import_customer', 'Import Woocommerce customers'),
                                                     ('import_products', 'Import Woocommerce product'),
+                                                    ('exportWoocomCategories','Export Category'),
+                                                    ('exportWoocomCustomer','Export Customers'),
+                                                    ('exportWoocomProducts','Export Poducts'),
+                                                    ('exportWoocomOrders','Export Orders'),
                                                     ], )
 
 

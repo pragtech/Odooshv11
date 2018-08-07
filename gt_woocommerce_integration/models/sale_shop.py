@@ -16,7 +16,7 @@
 #
 ##############################################################################
 
-import urllib.request
+# import urllib.request
 from odoo import api, fields, models, _
 from odoo.addons.gt_woocommerce_integration.api import API
 from odoo.addons.gt_woocommerce_integration.api import woocom_api
@@ -477,8 +477,16 @@ class SaleShop(models.Model):
 #             F.pop('image_medium')
             prd_tmp_vals.update({'attribute_line_ids': new_lines})
             # print ("VALSSSSSSSSPRODDD4444444444444444444DDDd",prd_tmp_vals)
-            
+            if prd_tmp_vals.get('woocom_product_img_ids'):
+                images_ids = []
+                for img in prd_tmp_vals.get('woocom_product_img_ids'):
+                    img_ids = product_image_obj.search([('woocom_img_id','=',img[2].get('woocom_img_id')),('product_t_id','=',temp_id[0].id)])
+                    if not img_ids:
+                        images_ids.append(img)
+                prd_tmp_vals.update({'woocom_product_img_ids': images_ids})
+
             temp_id = temp_id.write(prd_tmp_vals)
+            self.env.cr.commit()
         else:
             # print ("VALSSSSSSSSPRODDDDDDd",prd_tmp_vals)
            
@@ -679,7 +687,7 @@ class SaleShop(models.Model):
 
     @api.one
     def create_woo_customer(self, customer_detail, wcapi):
-        # print ("create_woo_customereeeeeeee=======>>>")
+        print ("create_woo_customereeeeeeee=======>>>",customer_detail)
 
         res_partner_obj = self.env['res.partner']
         country_obj = self.env['res.country']
@@ -791,18 +799,28 @@ class SaleShop(models.Model):
     
     @api.multi
     def importWoocomCustomer(self):
-        # print ("importWoocomCustomerrrrrrrrrr=======>>>")
+        print ("importWoocomCustomerrrrrrrrrr=======>>>")
         
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')
             count = 1
+            print ("wcapiiiiiiiiiiiiiiiii",wcapi)
+
             customers = wcapi.get("customers?page="+ str(count))
+            print ("CUSTtttttttttttt",customers,customers.status_code)
+
             if customers.status_code != 200:
                 raise UserError(_("Enter Valid url"))
+
             customer_list = customers.json()
+            print ("CUStttttlisttttttttt",customer_list)
+
             for custm in customer_list:
+                print ("forrrrrrrrrrrrrr",custm)
                 shop.create_woo_customer(custm, wcapi)
+
             while len(customer_list) > 0:
+
                 count += 1
                 custm = wcapi.get("customers?page="+ str(count))
                 customer_list = custm.json()
@@ -872,21 +890,29 @@ class SaleShop(models.Model):
 
     @api.one
     def create_woo_payment_method(self, payment, wcapi):
+        print ("create_woo_payment_methodddddddd",payment) 
+
         payment_obj = self.env['payment.gatway']
         pay_ids = payment_obj.search([('woocom_id', '=',payment.get('id'))])
+        print ("pay_idssssssssssssssss",pay_ids) 
+
         pay_vals = {
             'title': payment.get('title'),
             'woocom_id': payment.get('id'),
             'descrp': payment.get('description'),
             }
+        print ("pay_valsssssssssss",pay_vals) 
+
         pay_ids.write(pay_vals)
         if not pay_ids:
+            print ("nooottttttttttttt")
             payment_id = payment_obj.create(pay_vals)
             payment_id.write(pay_vals)
 
 
     @api.multi
     def importWooPaymentMethod(self):
+        print ("importWooPaymentMethodddddddddd")
         
         for shop in self:
             wcapi = API(url=shop.woocommerce_instance_id.location, consumer_key=shop.woocommerce_instance_id.consumer_key, consumer_secret=shop.woocommerce_instance_id.secret_key,wp_api=True, version='wc/v2')

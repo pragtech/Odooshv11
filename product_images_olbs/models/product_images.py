@@ -16,6 +16,7 @@
 #You should have received a copy of the GNU General Public License      #
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.  #
 #########################################################################
+# import urllib.request
 from odoo import api, fields, models, _
 import base64, urllib
 import os
@@ -79,7 +80,7 @@ class product_images(models.Model):
         for rec in self:
             each = rec.read(['link', 'url', 'name', 'file_db_store', 'product_id', 'product_t_id', 'name', 'extention'])[0]
             if each['link']:
-                (filename, header) = urllib.urlretrieve(each['url'])
+                (filename, header) = urllib.request.urlretrieve(each['url'])
                 f = open(filename , 'rb')
                 img = base64.encodestring(f.read())
                 f.close()
